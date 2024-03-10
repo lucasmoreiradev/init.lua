@@ -276,16 +276,6 @@ require('lazy').setup({
     opts = {}
   },
   { "rose-pine/neovim", name = "rose-pine" },
-  {
-    'numToStr/Comment.nvim',
-    opts = {
-        -- add any options here
-    },
-    lazy = false,
-    config = function()
-      require("Comment").setup()
-    end
-  }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
