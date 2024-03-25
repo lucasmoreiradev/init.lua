@@ -281,6 +281,79 @@ require('lazy').setup({
     branch = "harpoon2",
     dependencies = { "nvim-lua/plenary.nvim" }
   },
+  {
+    "jose-elias-alvarez/null-ls.nvim",
+    config = function()
+      local null_ls = require("null-ls")
+
+      local root_has_file = function(files)
+        return function(utils)
+          return utils.root_has_file(files)
+        end
+      end
+
+      local eslint_root_files = { ".eslintrc", ".eslintrc.yaml", ".eslintrc.js", ".eslintrc.json" }
+      local prettier_root_files = { ".prettierrc", ".prettierrc.js", ".prettierrc.json" }
+      local stylua_root_files = { "stylua.toml", ".stylua.toml" }
+      local elm_root_files = { "elm.json" }
+
+      local opts = {
+        eslint_formatting = {
+          condition = function(utils)
+            local has_eslint = root_has_file(eslint_root_files)(utils)
+            local has_prettier = root_has_file(prettier_root_files)(utils)
+            return has_eslint and not has_prettier
+          end,
+        },
+        eslint_diagnostics = {
+          condition = root_has_file(eslint_root_files),
+        },
+        prettier_formatting = {
+          condition = root_has_file(prettier_root_files),
+        },
+        stylua_formatting = {
+          condition = root_has_file(stylua_root_files),
+        },
+        elm_format_formatting = {
+          condition = root_has_file(elm_root_files),
+        },
+      }
+
+
+      local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+      local function on_attach(client, bufnr)
+        if client.supports_method("textDocument/formatting") then
+          vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            group = augroup,
+            buffer = bufnr,
+            callback = function()
+              -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
+              -- on later neovim version, you should use vim.lsp.buf.format({ async = false }) instead
+              vim.lsp.buf.format({ async = false })
+            end,
+          })
+        end
+        -- if client.server_capabilities.document_formatting then
+        --   vim.cmd("command! -buffer Formatting lua vim.lsp.buf.formatting()")
+        --   vim.cmd("command! -buffer FormattingSync lua vim.lsp.buf.formatting_sync()")
+        -- end
+      end
+
+      null_ls.setup({
+        sources = {
+          null_ls.builtins.diagnostics.eslint_d.with(opts.eslint_diagnostics),
+          null_ls.builtins.formatting.eslint_d.with(opts.eslint_formatting),
+          null_ls.builtins.formatting.prettier.with(opts.prettier_formatting),
+          null_ls.builtins.formatting.stylua.with(opts.stylua_formatting),
+          null_ls.builtins.formatting.elm_format.with(opts.elm_format_formatting),
+          null_ls.builtins.code_actions.eslint_d.with(opts.eslint_diagnostics),
+        },
+        on_attach = on_attach,
+      })
+    end,
+  },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -528,7 +601,7 @@ vim.defer_fn(function()
       swap = {
         enable = true,
         swap_next = {
-          ['<leader>a'] = '@parameter.inner',
+   --[[        ['<leader>a'] = '@parameter.inner', ]]
         },
         swap_previous = {
           ['<leader>A'] = '@parameter.inner',
@@ -650,6 +723,16 @@ mason_lspconfig.setup {
 
 mason_lspconfig.setup_handlers {
   function(server_name)
+    if server_name == 'eslint' then
+      require('lspconfig').eslint.setup({
+        on_attach = function(client, bufnr)
+          vim.api.nvim_create_autocmd('BufWritePre', {
+            buffer = bufnr,
+            command = 'EslintFixAll',
+          })
+        end,
+      })
+    end
     require('lspconfig')[server_name].setup {
       capabilities = capabilities,
       on_attach = on_attach,
