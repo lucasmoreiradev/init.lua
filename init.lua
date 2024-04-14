@@ -275,7 +275,25 @@ require('lazy').setup({
     event = "InsertEnter",
     opts = {}
   },
-  { "rose-pine/neovim", name = "rose-pine" },
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    config = function()
+      require('rose-pine').setup({
+        disable_background = true,
+        styles = {
+          italic = false,
+          transparency = true
+        },
+      })
+
+      vim.cmd("colorscheme rose-pine")
+      vim.cmd.colorscheme("rose-pine")
+      vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+      vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+      -- ColorMyPencils()
+    end
+  },
   {
     "ThePrimeagen/harpoon",
     branch = "harpoon2",
@@ -353,6 +371,12 @@ require('lazy').setup({
         on_attach = on_attach,
       })
     end,
+  },
+  {
+    "mbbill/undotree",
+    config = function()
+      vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
+    end
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -793,6 +817,5 @@ cmp.setup {
     { name = 'path' },
   },
 }
-vim.cmd("colorscheme rose-pine")
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

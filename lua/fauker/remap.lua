@@ -9,4 +9,6 @@ vim.keymap.set("n", "N", "Nzzzv")
 
 vim.opt.nu = true
 vim.opt.relativenumber = true
+vim.opt.colorcolumn = "120"
+vim.opt.scrolloff = 8
 
