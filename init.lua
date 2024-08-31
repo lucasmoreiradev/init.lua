@@ -376,10 +376,8 @@ require('lazy').setup({
         },
       eslint_diagnostics = {
         condition = function(utils)
-          if utils.buffer:get_name():match("%.d%.ts$") then
             return false
-          end
-          return root_has_file(eslint_root_files)(utils)
+            -- return root_has_file(eslint_root_files)(utils)
         end,
         filetypes = { "javascript", "typescript", "json" },  -- Excluindo "vue"
       },
