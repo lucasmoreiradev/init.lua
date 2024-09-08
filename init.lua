@@ -769,7 +769,9 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
+  tsserver = {},
+  vtsls = {},
+  volar = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
   lua_ls = {
     Lua = {
@@ -870,8 +872,7 @@ cmp.setup {
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 --
-
-require'lspconfig'.tsserver.setup{
+require'lspconfig'.tsserver.setup {
   init_options = {
     plugins = {
       {
@@ -886,4 +887,13 @@ require'lspconfig'.tsserver.setup{
     "typescript",
     "vue",
   },
+  on_attach = function(client, bufnr)
+    -- Verifica se o arquivo é .ts e desabilita o tsserver, pois
+    -- usamos o vtsls para arquivos typescript
+    local filename = vim.api.nvim_buf_get_name(bufnr)
+    if filename:match("%.ts$") or filename:match("%.tsx$") then
+      client.stop()
+      return
+    end
+  end
 }
